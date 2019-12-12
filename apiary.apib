@@ -1,0 +1,98 @@
+FORMAT: 1A
+HOST: http://localhost:3000/api/
+
+# Splitter
+
+Splitter is clone for famous application splitwise
+
+## Register [/users/register]
+New users can register with given api. Email is unique
+### Register [POST]
+
++ Request (application/json)
+
+        {
+            "name": "Jhon Doe",
+            "email":"jhon@gmail.com",
+            "phone":"9876543210",
+            "password":"j@password1"
+        }
++ Response 200 (application/json)
+
+        
+        {
+            "success": true
+        }
+        
+        
+## Login [/users/login]
+### Login [POST]
++ Request (application/json)
+
+        {
+            "email":"jhon@gmail.com",
+            "password":"j@password1"
+        }
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "profile": {
+                "name" : "new name",
+                "email": "user1@email.com",
+                "phone": "9427492111"
+            },
+            "data": {
+                "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InVzZXIxQGVtYWlsLmNvbSIsImlkIjo1LCJ0aW1lIjoiMjAxOS0xMi0xMlQwNDoyMTo1Mi4wMjVaIiwiaWF0IjoxNTc2MTI0NTEyLCJleHAiOjE1NzYxNDYxMTJ9.yn4q6HyTcmWVitwtOmuEwwoJNtNDlfWkhGz-QWPyhW8"
+            }
+        }
+
+## Update Profile [/users/updateProfile]
+
+### Update Profile [POST]
+
++ Request (application/json)
+
+        {
+            "name": "Jhon Doe",
+            "phone":"9876543210",
+            "password":"j@password1"
+        }
++ Response 200 (application/json)
+
+        
+        {
+            "success": true
+        }
+## Add Contact [/users/addContact]
+
+### Add Contact [POST]
+
++ Request (application/json)
+
+        {
+            "email": "friend@gmail.com",
+            "name": "Jhon Doe",
+            "phone":"9876543210"
+        }
++ Response 200 (application/json)
+
+        
+        {
+            "success": true
+        }
+        
+## Get Contacts [/users/getContacts]
+
+### Get Contacts [POST]
+
++ Request (application/json)
+
+       
++ Response 200 (application/json)
+
+        
+        {
+            "success": true
+        }
