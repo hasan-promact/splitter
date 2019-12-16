@@ -21,7 +21,8 @@ New users can register with given api. Email is unique
 
         
         {
-            "success": true
+            "success": true,
+            "message": "User registered successfully"
         }
         
         
@@ -54,33 +55,50 @@ New users can register with given api. Email is unique
 
 + Request (application/json)
 
-        {
-            "name": "Jhon Doe",
-            "phone":"9876543210",
-            "password":"j@password1"
-        }
+    + Header
+    
+        
+            token: "token"
+        
+        
+    + Body
+    
+            {
+                "name": "Jhon Doe",
+                "phone":"9876543210",
+                "password":"j@password1"
+            }
+            
 + Response 200 (application/json)
 
         
         {
-            "success": true
+            "success": true,
+            "message": "Profile updated successfully"
         }
 ## Add Contact [/users/addContact]
 
 ### Add Contact [POST]
 
 + Request (application/json)
-
-        {
-            "email": "friend@gmail.com",
-            "name": "Jhon Doe",
-            "phone":"9876543210"
-        }
+    
+    + Header
+        
+            token: "token"
+        
+    + Body
+    
+            {
+                "email": "friend@gmail.com",
+                "name": "Jhon Doe",
+                "phone":"9876543210"
+            }
 + Response 200 (application/json)
 
         
         {
-            "success": true
+            "success": true,
+            "message": "Contact added successfully"
         }
         
 ## Get Contacts [/users/getContacts]
@@ -88,11 +106,268 @@ New users can register with given api. Email is unique
 ### Get Contacts [POST]
 
 + Request (application/json)
+    
+    + Header
+        
+            token: "token"
+        
+    
+       
++ Response 200 (application/json)
 
+        
+        [
+            {
+                "id": 9,
+                "name": "name",
+                "email": "user@mail.com",
+                "phone": "9876543213",
+                "UserContact": {
+                    "fkUserId": 5,
+                    "fkContactId": 9
+                }
+            },
+            {
+                "id": 10,
+                "name": "name 1",
+                "email": "user1@mail.com",
+                "phone": "9876543212",
+                "UserContact": {
+                    "fkUserId": 5,
+                    "fkContactId": 10
+                }
+            },
+            {
+                "id": 11,
+                "name": "name 2",
+                "email": "user2@mail.com",
+                "phone": "9876543211",
+                "UserContact": {
+                    "fkUserId": 5,
+                    "fkContactId": 11
+                }
+            },
+            {
+                "id": 12,
+                "name": "name 3",
+                "email": "user4@mail.com",
+                "phone": "9876543210",
+                "UserContact": {
+                    "fkUserId": 5,
+                    "fkContactId": 12
+                }
+            }
+        ]
+        
+## List Groups [/groups/list]
+
+### All Groups [POST]
+
++ Request (application/json)
+    
+    + Header
+        
+            token: "token"
+        
+    
+       
++ Response 200 (application/json)
+
+        
+        [
+            {
+                "id": 3,
+                "name": "third group",
+                "UserGroup": {
+                    "fkUserId": 5,
+                    "fkGroupId": 3
+                }
+            }
+        ]
+        
+## Create Groups [/groups/create]
+
+### Create Group [POST]
+
++ Request (application/json)
+    
+    + Header
+        
+            token: "token"
+        
+    + Body
+    
+            {
+                "name": "My Group",
+                "description":"My group description"
+            }
        
 + Response 200 (application/json)
 
         
         {
-            "success": true
+            "success": true,
+            "message": "Group created successfully"
+        }
+
+## Add Users [/groups/addUsers/{GroupId}]
+
+### Add Users [POST]
+
++ Request (application/json)
+    
+    + Header
+        
+            token: "token"
+        
+    + Body
+    
+            {
+                "users": [1,2,55],
+                
+            }
+       
++ Response 200 (application/json)
+
+        
+        {
+            "success": true,
+            "message": "Users added in group successfully"
+        }        
+
+## Group Details [/groups/details/{GroupId}]
+
+### Details [POST]
+
++ Request (application/json)
+    
+    + Header
+        
+            token: "token"
+        
+       
++ Response 200 (application/json)
+
+        
+        {
+            "id": 3,
+            "name": "third group",
+            "description": "",
+            "fkCreatorUserId": 5,
+            "isSetteled": false,
+            "createdDateTime": "2019-12-06T07:00:01.597Z",
+            "updatedDateTime": "2019-12-06T07:00:01.597Z",
+            "deletedDateTime": null,
+            "users": [
+                {
+                    "id": 6,
+                    "name": "hasan ch",
+                    "email": "user3@email.com",
+                    "phone": "9876543210",
+                    "UserGroup": {
+                        "fkUserId": 6,
+                        "fkGroupId": 3
+                    }
+                },
+                {
+                    "id": 7,
+                    "name": "hasan ch",
+                    "email": "user4@email.com",
+                    "phone": "9876543211",
+                    "UserGroup": {
+                        "fkUserId": 7,
+                        "fkGroupId": 3
+                    }
+                },
+                {
+                    "id": 5,
+                    "name": "new name",
+                    "email": "user1@email.com",
+                    "phone": "9876543212",
+                    "UserGroup": {
+                        "fkUserId": 5,
+                        "fkGroupId": 3
+                    }
+                }
+            ],
+            "expence": [
+                {
+                    "id": 1,
+                    "amount": 500
+                },
+                {
+                    "id": 2,
+                    "amount": 500
+                }
+            ]
+        }
+        
+## Add Expences [/groups/addExpence/{GroupId}]
+
+### Add Expences [POST]
+
++ Request (application/json)
+    
+    + Header
+        
+            token: "token"
+        
+    + Body
+    
+            {
+                "amount": 500,
+                "paidBy":3,
+                "description":"House rent"
+            }
+       
++ Response 200 (application/json)
+
+        
+        {
+            "success": true,
+            "message": "Group expences added successfully"
+        }
+        
+
+## Get users expences [/users/getExpences]
+
+### Details [POST]
+
++ Request (application/json)
+    
+    + Header
+        
+            token: "token"
+        
+       
++ Response 200 (application/json)
+
+        
+        [
+            {
+                "id": 3,
+                "amount": 167,
+                "fkExpenceId": 2,
+                "fkPaidBy": 3,
+                "isSetteledUp": false
+            }
+        ]
+        
+## Settle Expences [/users/settleExpences/{expenceId}]
+
+### Add Expences [POST]
+
++ Request (application/json)
+    
+    + Header
+        
+            token: "token"
+        
+   
++ Response 200 (application/json)
+
+        
+        {
+            "success": true,
+            "message": "Expence setteled successfully"
         }
