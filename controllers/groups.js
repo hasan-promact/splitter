@@ -24,7 +24,7 @@ function create(req, res) {
         return Group.create({ name: name, description: description, fkCreatorUserId: req.user.id, isSetteled: false })
             .then(group => {
                 return UserGroup.create({ fkUserId: req.user.id, fkGroupId: group.id })
-                    .then(() => res.send({ success: true }))
+                    .then(() => res.send({ success: true, message: "Group created successfully" }))
                     .catch((err) => res.send({ success: false, message: err }));
             })
             .catch((error) => { console.log(error); res.send({ success: false, message: error }); });
@@ -43,7 +43,7 @@ function addUsers(req, res) {
         addPromise.push(UserGroup.create({ fkUserId: newUsers[i], fkGroupId: req.params.id }))
     }
     Promise.all(addPromise)
-        .then(() => res.send({ success: true }))
+        .then(() => res.send({ success: true, message: "Users added in group successfully" }))
         .catch((err) => res.send({ success: false, message: err }));
 
 }
@@ -53,6 +53,11 @@ function details(req, res) {
             model: User,
             as: 'users',
             attributes: ['id', 'name', 'email', 'phone']
+        },
+        {
+            model: Expence,
+            as: 'expence',
+            attributes: ['id', 'amount']
         }]
     })
         .then(group => {
@@ -115,7 +120,7 @@ function addExpence(req, res) {
                                 });
                                 return Promise.all(addPromise);
                             })
-                            .then(() => res.send({ success: true })
+                            .then(() => res.send({ success: true, message: "Group expences added successfully" })
                             )
                             .catch((error) => { console.log(error.message); res.send({ success: false, message: error.message, error: error }); });
                     } else {

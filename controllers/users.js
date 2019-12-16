@@ -81,7 +81,7 @@ function register(req, res) {
                                     password: bcrypt.hashSync(req.body.password, config.saltRounds)
                                 };
                                 return exists.update(user)
-                                    .then(() => res.send({ success: true }))
+                                    .then(() => res.send({ success: true, message: "User registered successfully" }))
                                     .catch((err) => res.send({ success: false, message: err }));
                             } else {
                                 var nuser = {
@@ -92,7 +92,7 @@ function register(req, res) {
                                     password: bcrypt.hashSync(req.body.password, config.saltRounds)
                                 };
                                 return User.create(nuser)
-                                    .then(() => res.send({ success: true }))
+                                    .then(() => res.send({ success: true, message: "User registered successfully" }))
                                     .catch((err) => res.send({ success: false, message: err }));
                             }
                         })
@@ -113,7 +113,7 @@ function addContact(req, res) {
             if (nuser) {
                 return UserContact.create({ fkUserId: req.user.id, fkContactId: nuser.id })
                     .then(sucess => {
-                        res.send({ success: true });
+                        res.send({ success: true, message: "Contact added successfully" });
                     })
                     .catch((error) => { console.log(error); res.send({ success: false, message: error }); });
             } else {
@@ -127,7 +127,7 @@ function addContact(req, res) {
                 };
                 return User.create(ncuser)
                     .then((guser) => UserContact.create({ fkUserId: req.user.id, fkContactId: guser.id }))
-                    .then(() => res.send({ success: true }))
+                    .then(() => res.send({ success: true, message: "Contact added successfully" }))
                     .catch((err) => res.send({ success: false, message: err }));
             }
         })
@@ -159,7 +159,7 @@ function updateProfile(req, res) {
                 updateuser.password = bcrypt.hashSync(req.body.password, config.saltRounds);
             }
             return user.update(updateuser)
-                .then(() => res.send({ success: true }))
+                .then(() => res.send({ success: true, message: "Profile updated successfully" }))
                 .catch((err) => res.send({ success: false, message: err }));
         })
         .catch((error) => { console.log(error); res.send({ success: false, message: error }); });
@@ -173,9 +173,52 @@ function getExpences(req, res) {
         }]
     })
         .then(user => {
-            res.send(user);
+            res.send(user.expences);
         })
         .catch((error) => { console.log(error); res.send({ success: false, message: error }); });
+}
+function settleExpences(req, res) {
+    if (req.params.id) {
+        return UserExpence.findByPk(req.params.id)
+            .then(userexpence => {
+                if (userexpence) {
+                    if (!userexpence.isSetteledUp) {
+                        if (userexpence.fkPaidBy !== req.user.id) {
+                            userexpence.update({ isSetteledUp: true })
+                                .then(() => {
+                                    return Expence.findByPk(userexpence.fkExpenceId, {
+                                        include: [{
+                                            model: UserExpence,
+                                            as: 'expence',
+                                            attributes: ['id', 'amount', 'fkExpenceId', 'fkPaidBy', 'isSetteledUp']
+                                        }]
+                                    });
+                                }).then((expence) => {
+                                    var allPaid = true;
+                                    expence.expence.forEach(expence => {
+                                        if (!expence.isSetteledUp) {
+                                            allPaid = false;
+                                        }
+                                    });
+                                    if (allPaid) {
+                                        expence.update({ isSetteledUp: true });
+                                    }
+                                    res.send({ success: true, message: "Expence setteled successfully" });
+                                })
+                                .catch((error) => { console.log(error); res.send({ success: false, message: error }); });
+                        } else {
+                            res.send({ success: false, message: "This expence is not paid by you" });
+                        }
+                    } else {
+                        res.send({ success: false, message: "Expence is already setteled" });
+                    }
+                } else {
+                    res.send({ success: false, message: "No expence found" });
+                }
+                //res.send(user.expences);
+            })
+            .catch((error) => { console.log(error); res.send({ success: false, message: error }); });
+    }
 }
 module.exports = {
     login,
@@ -183,5 +226,6 @@ module.exports = {
     addContact,
     getContacts,
     updateProfile,
-    getExpences
+    getExpences,
+    settleExpences
 };

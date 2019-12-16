@@ -14,5 +14,6 @@ router.post('/addContact', authController.checkAuth, usersController.addContact)
 router.post('/getContacts', authController.checkAuth, usersController.getContacts);
 router.post('/updateProfile', authController.checkAuth, usersController.updateProfile);
 router.post('/getExpences', authController.checkAuth, usersController.getExpences);
+router.post('/settleExpences/:id', authController.checkAuth, usersController.settleExpences);
 
 module.exports = router;
