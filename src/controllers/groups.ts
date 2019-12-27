@@ -1,88 +1,87 @@
-const Group = require('../database/models').Group;
-const User = require('../database/models').User;
-const UserGroup = require('../database/models').UserGroup;
-const Expence = require('../database/models').Expence;
-const UserExpence = require('../database/models').UserExpence;
+import { Group } from "../database/models/group";
+import { Expence } from "../database/models/expence";
+import { User } from "../database/models/user";
+import { UserExpence } from "../database/models/userexpence";
+import { UserGroup } from "../database/models/usergroup";
 
-function list(req, res) {
+export function list(req: any, res: any) {
     return User.findByPk(req.user.id, {
         include: [{
             model: Group,
-            as: 'groups',
-            attributes: ['id', 'name']
+            as: "groups",
+            attributes: ["id", "name"]
         }]
     })
-        .then(user => {
+        .then((user: User) => {
             res.send(user.groups);
         })
-        .catch((error) => { console.log(error); res.send({ success: false, message: error }); });
+        .catch((error: any) => { res.send({ success: false, message: error }); });
 }
-function create(req, res) {
+export function create(req: any, res: any) {
     if (req.body.name) {
-        var name = req.body.name || "";
-        var description = req.body.description || "";
-        return Group.create({ name: name, description: description, fkCreatorUserId: req.user.id, isSetteled: false })
-            .then(group => {
+        const name = req.body.name || "";
+        const description = req.body.description || "";
+        return Group.create({ name, description, fkCreatorUserId: req.user.id, isSetteled: false })
+            .then((group: Group) => {
                 return UserGroup.create({ fkUserId: req.user.id, fkGroupId: group.id })
                     .then(() => res.send({ success: true, message: "Group created successfully" }))
-                    .catch((err) => res.send({ success: false, message: err }));
+                    .catch((err: any) => res.send({ success: false, message: err }));
             })
-            .catch((error) => { console.log(error); res.send({ success: false, message: error }); });
+            .catch((error: any) => { res.send({ success: false, message: error }); });
 
     } else {
         res.send({ success: false, message: "Name is required" });
     }
 
 }
-function addUsers(req, res) {
+export function addUsers(req: any, res: any) {
 
-    var newUsers = req.body.users;
-    var addPromise = []
-    for (var i = 0; i < newUsers.length; i++) {
-        console.log(newUsers[i]);
-        addPromise.push(UserGroup.create({ fkUserId: newUsers[i], fkGroupId: req.params.id }))
+    const newUsers = req.body.users;
+    const addPromise = [];
+    for (const newUser of newUsers) {
+        addPromise.push(UserGroup.create({ fkUserId: newUser, fkGroupId: req.params.id }));
     }
     Promise.all(addPromise)
         .then(() => res.send({ success: true, message: "Users added in group successfully" }))
-        .catch((err) => res.send({ success: false, message: err }));
+        .catch((err: any) => res.send({ success: false, message: err }));
 
 }
-function details(req, res) {
+export function details(req: any, res: any) {
     return Group.findByPk(req.params.id, {
         include: [{
             model: User,
-            as: 'users',
-            attributes: ['id', 'name', 'email', 'phone']
+            as: "users",
+            attributes: ["id", "name", "email", "phone"]
         },
         {
             model: Expence,
-            as: 'expence',
-            attributes: ['id', 'amount']
+            as: "expence",
+            attributes: ["id", "amount"]
         }]
     })
-        .then(group => {
+        .then((group: Group) => {
             res.send(group);
         })
-        .catch((error) => { console.log(error); res.send({ success: false, message: error }); });
+        .catch((error: any) => { res.send({ success: false, message: error }); });
 
 }
-function addExpence(req, res) {
-    var isUserPartOfGroup = false;
-    var addPromise = [];
-    var isPayerPartofGroup = false;
+export function addExpence(req: any, res: any) {
+    let isUserPartOfGroup = false;
+    const addPromise: any = [];
+    let isPayerPartofGroup = false;
     if (!isNaN(req.params.id)) {
         if ((req.body.amount) && (req.body.paidBy)) {
             return Group.findByPk(req.params.id, {
                 include: [{
                     model: User,
-                    as: 'users',
-                    attributes: ['id']
+                    as: "users",
+                    attributes: ["id"]
                 }]
             })
-                .then(group => {
+                .then((group: Group) => {
                     if (group) {
-                        console.log("members -> " + group.users.length);
-                        group.users.forEach(user => {
+
+                        group.users.forEach((user: User) => {
                             if (req.user.id === user.id) {
                                 isUserPartOfGroup = true;
                             }
@@ -97,7 +96,7 @@ function addExpence(req, res) {
                         if (!isPayerPartofGroup) {
                             throw new Error("Expence payer is not part of group");
                         }
-                        var createExpence = {
+                        const createExpence = {
                             amount: req.body.amount,
                             fkGroupId: group.id,
                             fkPaidBy: req.body.paidBy,
@@ -106,15 +105,16 @@ function addExpence(req, res) {
                             description: req.body.description || ""
                         };
                         return Expence.create(createExpence)
-                            .then(expence => {
-                                var splitAmt = Math.round(req.body.amount / group.users.length);
-                                var userExp = {
+                            .then((expence: Expence) => {
+                                const splitAmt = Math.round(req.body.amount / group.users.length);
+                                const userExp = {
                                     amount: splitAmt,
                                     fkExpenceId: expence.id,
                                     fkPaidBy: req.body.paidBy,
-                                    isSetteledUp: false
-                                }
-                                group.users.forEach(user => {
+                                    isSetteledUp: false,
+                                    fkUserId: 0
+                                };
+                                group.users.forEach((user: User) => {
                                     userExp.fkUserId = user.id;
                                     addPromise.push(UserExpence.create(userExp));
                                 });
@@ -122,12 +122,12 @@ function addExpence(req, res) {
                             })
                             .then(() => res.send({ success: true, message: "Group expences added successfully" })
                             )
-                            .catch((error) => { console.log(error.message); res.send({ success: false, message: error.message, error: error }); });
+                            .catch((error: any) => { res.send({ success: false, message: error.message, error }); });
                     } else {
                         throw new Error("No group found");
                     }
                 })
-                .catch((error) => { console.log(error.message); res.send({ success: false, message: error.message, error: error }); });
+                .catch((error: any) => { res.send({ success: false, message: error.message, error }); });
         } else {
             res.send({ success: false, message: "Amount and paid by user id is required and should be numeric only" });
         }
@@ -135,25 +135,16 @@ function addExpence(req, res) {
         res.send({ success: false, message: "Group id shoud be numeric only" });
     }
 }
-function getExpences(req, res) {
+export function getExpences(req: any, res: any) {
     return Group.findByPk(req.params.id, {
         include: [{
             model: Expence,
-            as: 'expence',
-            attributes: ['id', 'amount']
+            as: "expence",
+            attributes: ["id", "amount"]
         }]
     })
-        .then(group => {
+        .then((group: Group) => {
             res.send(group);
         })
-        .catch((error) => { console.log(error); res.send({ success: false, message: error }); });
+        .catch((error: any) => { res.send({ success: false, message: error }); });
 }
-
-module.exports = {
-    create,
-    list,
-    details,
-    addUsers,
-    addExpence,
-    getExpences
-};
